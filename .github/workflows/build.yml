@@ -1,0 +1,36 @@
+name: Build Geometry Dash 1.0 3DS CIA
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install makerom and bannertool
+        run: |
+          apt-get update && apt-get install -y wget unzip
+          wget -q https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18.4/makerom-v0.18.4-ubuntu_x86_64.zip
+          unzip -o makerom-v0.18.4-ubuntu_x86_64.zip -d /usr/local/bin/
+          chmod +x /usr/local/bin/makerom
+          wget -q https://github.com/Steveice10/bannertool/releases/download/1.2.0/bannertool.zip
+          unzip -o bannertool.zip
+          cp linux-x86_64/bannertool /usr/local/bin/
+          chmod +x /usr/local/bin/bannertool
+
+      - name: Build 3DSX and CIA
+        run: make cia
+
+      - name: Upload CIA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GeometryDash-1.0-3DS
+          path: "*.cia"
