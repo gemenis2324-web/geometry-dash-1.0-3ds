@@ -37,6 +37,9 @@ jobs:
           if [ ! -f assets/banner.png ]; then
             python3 -c "from PIL import Image; Image.new('RGB', (256, 128), (20, 65, 180)).save('assets/banner.png')"
           fi
+          if [ ! -f assets/audio.wav ]; then
+            python3 -c "import wave; f=wave.open('assets/audio.wav','w'); f.setnchannels(1); f.setsampwidth(2); f.setframerate(22050); f.writeframes(b'\x00\x00'*2205); f.close()"
+          fi
           if [ ! -f build.rsf ]; then
             cat << 'EOF' > build.rsf
           BasicInfo:
