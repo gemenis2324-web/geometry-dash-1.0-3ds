@@ -17,14 +17,67 @@ jobs:
 
       - name: Install makerom and bannertool
         run: |
-          apt-get update && apt-get install -y wget unzip
+          apt-get update && apt-get install -y wget unzip python3-pil
           wget -q https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18.4/makerom-v0.18.4-ubuntu_x86_64.zip
           unzip -o makerom-v0.18.4-ubuntu_x86_64.zip -d /usr/local/bin/
           chmod +x /usr/local/bin/makerom
-          wget -q https://github.com/Steveice10/bannertool/releases/download/1.2.0/bannertool.zip
-          unzip -o bannertool.zip
-          cp linux-x86_64/bannertool /usr/local/bin/
+
+          wget -q https://github.com/Epicpkmn11/bannertool/releases/download/v1.2.2/bannertool.zip
+          unzip -o bannertool.zip -d /tmp/bannertool
+          cp /tmp/bannertool/linux-x86_64/bannertool /usr/local/bin/
           chmod +x /usr/local/bin/bannertool
+          rm -rf /tmp/bannertool bannertool.zip makerom-v0.18.4-ubuntu_x86_64.zip
+
+      - name: Ensure assets and build.rsf exist
+        run: |
+          mkdir -p assets
+          if [ ! -f assets/icon.png ]; then
+            python3 -c "from PIL import Image; Image.new('RGBA', (48, 48), (0, 220, 80, 255)).save('assets/icon.png')"
+          fi
+          if [ ! -f assets/banner.png ]; then
+            python3 -c "from PIL import Image; Image.new('RGB', (256, 128), (20, 65, 180)).save('assets/banner.png')"
+          fi
+          if [ ! -f build.rsf ]; then
+            cat << 'EOF' > build.rsf
+          BasicInfo:
+            Title                   : "Geometry Dash 1.0"
+            ProductCode             : "CTR-P-GD10"
+            Logo                    : Nintendo
+
+          TitleInfo:
+            UniqueId                : 0x0GD10
+            Category                : Application
+
+          Option:
+            UseOnSD                 : true
+            FreeProductCode         : true
+            MediaFootprint          : Megabyte
+            MediaSize               : 128MB
+            EnableCrypt             : false
+
+          AccessControlInfo:
+            ExtSaveDataId          : 0x0GD10
+            SystemSaveDataId1       : 0x00000000
+            SystemSaveDataId2       : 0x00000000
+            OtherUserSaveDataId1    : 0x00000000
+            OtherUserSaveDataId2    : 0x00000000
+            OtherUserSaveDataId3    : 0x00000000
+            UseExtSaveData          : false
+            SaveDataSize            : 0KB
+            RemasterVersion         : 0
+            StackSize               : 0x4000
+            FsAccessInfo:
+              ClientAccess          :
+                - SaveData
+                - ExtSaveData
+                - DirectSdmc
+            ServiceAccessControl:
+              - APT:U
+              - gsp::Gpu
+              - hid:USER
+              - cfg:u
+          EOF
+          fi
 
       - name: Build 3DSX and CIA
         run: make cia
