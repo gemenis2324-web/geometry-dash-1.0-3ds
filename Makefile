@@ -39,7 +39,7 @@ all: $(TARGET).3dsx
 cia: $(TARGET).cia
 
 $(TARGET).cia: $(TARGET).elf
-	@bannertool makebanner -i assets/banner.png -a assets/audio.wav -o $(BUILD)/banner.bnr 2>/dev/null || bannertool makebanner -i assets/banner.png -cg -o $(BUILD)/banner.bnr
+	@bannertool makebanner -i assets/banner.png -a assets/audio.wav -o $(BUILD)/banner.bnr
 	@bannertool makesmdh -s "$(APP_TITLE)" -l "$(APP_DESCRIPTION)" -p "$(APP_AUTHOR)" -i assets/icon.png -o $(BUILD)/icon.smdh
 	@makerom -f cia -o $(TARGET).cia -elf $(TARGET).elf -rsf build.rsf -icon $(BUILD)/icon.smdh -banner $(BUILD)/banner.bnr
 	@echo "CIA generado: $(TARGET).cia"
