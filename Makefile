@@ -10,15 +10,24 @@ APP_AUTHOR	:= HomebrewDev
 APP_PRODUCT_CODE := CTR-P-GD10
 APP_UNIQUE_ID	:= 0x0GD10
 
-ARCH	:= -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
-CFLAGS	:= -g -Wall -O3 -mword-relocations -fomit-frame-pointer -ffunction-sections $(ARCH) $(DEFINES)
-CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
-ASFLAGS	:= -g $(ARCH)
-LDFLAGS	:= -specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+DEVKITARM	?= /opt/devkitpro/devkitARM
+DEVKITPRO	?= /opt/devkitpro
 
-LIBS	:= -lcitro2d -lcitro3d -lctru -lm
+PREFIX		:= arm-none-eabi-
+CC		:= $(DEVKITARM)/bin/$(PREFIX)gcc
+CXX		:= $(DEVKITARM)/bin/$(PREFIX)g++
+AS		:= $(DEVKITARM)/bin/$(PREFIX)as
+LD		:= $(DEVKITARM)/bin/$(PREFIX)g++
 
 export PATH := $(DEVKITARM)/bin:$(DEVKITPRO)/tools/bin:$(PATH)
+
+ARCH	:= -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+CFLAGS	:= -g -Wall -O3 -mword-relocations -fomit-frame-pointer -ffunction-sections $(ARCH) $(DEFINES) -I$(DEVKITPRO)/libctru/include -I$(DEVKITPRO)/portlibs/3ds/include
+CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
+ASFLAGS	:= -g $(ARCH)
+LDFLAGS	:= -specs=3dsx.specs -g $(ARCH) -L$(DEVKITPRO)/libctru/lib -L$(DEVKITPRO)/portlibs/3ds/lib -Wl,-Map,$(notdir $*.map)
+
+LIBS	:= -lcitro2d -lcitro3d -lctru -lm
 
 CPPFILES := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.cpp))
 OFILES   := $(addprefix $(BUILD)/,$(notdir $(CPPFILES:.cpp=.o)))
@@ -36,7 +45,7 @@ $(TARGET).cia: $(TARGET).elf
 	@echo "CIA generado: $(TARGET).cia"
 
 $(TARGET).elf: $(OFILES)
-	$(CXX) $(LDFLAGS) $(OFILES) $(LIBS) -o $@
+	$(LD) $(LDFLAGS) $(OFILES) $(LIBS) -o $@
 
 $(BUILD)/%.o: $(SOURCES)/%.cpp
 	@mkdir -p $(BUILD)
